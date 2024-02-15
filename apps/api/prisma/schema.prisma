@@ -11,21 +11,50 @@ datasource db {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  username String?  @unique
-  password String
-  Profile  Profile?
+  id        Int      @id @default(autoincrement())
+  Profile   Profile?
+  Post      Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("users")
 }
 
 model Profile {
-  id     Int     @id @default(autoincrement())
-  bio    String?
-  image  String?
-  userId Int     @unique
-  user   User    @relation(fields: [userId], references: [id])
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  username     String   @unique
+  password     String
+  profileImage String?
+  userId       Int      @unique
+  user         User     @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@map("profiles")
+}
+
+model Post {
+  id         Int        @id @default(autoincrement())
+  title      String
+  content    String
+  published  Boolean    @default(false)
+  authorId   Int
+  author     User       @relation(fields: [authorId], references: [id])
+  categories Category[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@map("posts")
+}
+
+model Category {
+  id           Int      @id @default(autoincrement())
+  categoryId   String   @unique @default(uuid())
+  categoryName String   @unique
+  posts        Post[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("categories")
 }
