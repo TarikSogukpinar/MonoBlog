@@ -1,6 +1,11 @@
 import { IsEmail, IsString, IsNotEmpty, Length } from 'class-validator';
 
 export class RegisterUserDto {
+  @IsString({ message: 'Username must be string' })
+  @IsNotEmpty({ message: 'Username required' })
+  @Length(2, 100, { message: 'Username too long' })
+  username: string;
+  
   @IsEmail({}, { message: 'Email must be valid email' })
   @IsNotEmpty({ message: 'Email required' })
   @Length(2, 100, { message: 'Email too long' })
