@@ -5,14 +5,14 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 export class SwaggerService {
   setupSwagger(app: INestApplication) {
     const config = new DocumentBuilder()
-      .setTitle('Microprefix Boilerplate API')
-      .setDescription('The Microprefix Boilerplate API description')
+      .setTitle('Mono Blog Boilerplate API')
+      .setDescription('Mono Blog Boilerplate API description')
       .setVersion('1.0')
       .addBearerAuth(
         { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
         'access-token',
       )
-      .addTag('microprefix')
+      .addTag('Blogger')
       .build();
 
     const document = SwaggerModule.createDocument(app, config);

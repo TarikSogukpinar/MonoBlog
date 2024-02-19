@@ -1,26 +1,102 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { RegisterUserDto } from './dto/registerUser.dto';
+import { RegisterResponseDto } from './dto/registerResponse.dto';
+import { LoginUserDto } from './dto/loginUser.dto';
+import { LoginResponseDto } from './dto/loginResponse.dto';
+import { User } from '@prisma/client';
+import { PrismaService } from 'src/database/database.service';
+import { ErrorCodes } from 'src/core/handlers/error/error-codes';
+import { HashingService } from 'src/utils/hashing/hashing.service';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly hashingService: HashingService,
+  ) {}
+
+  async registerUserService(
+    registerUserDto: RegisterUserDto,
+  ): Promise<RegisterResponseDto> {
+    try {
+      const existingUser = await this.findUserByEmailService(
+        registerUserDto.email,
+      );
+
+      if (existingUser) {
+        throw new ConflictException(ErrorCodes.UserAlreadyExists);
+      }
+
+      const createNewUser = await this.prismaService.user.create({
+        data: {
+          email: registerUserDto.email,
+          password: await this.hashingService.hashPassword(
+            registerUserDto.password,
+          ),
+        },
+      });
+
+      return {
+        id: createNewUser.id,
+        email: createNewUser.email,
+        role: createNewUser.role,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async loginUserService(
+    loginUserDto: LoginUserDto,
+  ): Promise<LoginResponseDto> {
+    try {
+      const users = await this.validateUserService(loginUserDto);
+      const accessToken = await this.tokenService.createAccessToken(users);
+      const refreshToken = await this.tokenService.createRefreshToken(users);
+      await this.tokenService.updateRefreshToken(users, refreshToken);
+
+      return {
+        accessToken,
+        refreshToken,
+        email: users.email,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  private async findUserByEmailService(email: string): Promise<User> {
+    const user = await this.prismaService.user.findUnique({ where: { email } });
+
+    if (user) throw new ConflictException(ErrorCodes.UserAlreadyExists);
+    return user;
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+  private async validateUserService(loginUserDto: LoginUserDto) {
+    const { email, password } = loginUserDto;
+    const user = await this.prismaService.user.findUnique({ where: { email } });
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    if (!user) throw new NotFoundException(ErrorCodes.UserNotFound);
+
+    const isPasswordValid = await this.hashingService.comparePassword(
+      password,
+      user.password,
+    );
+
+    if (!isPasswordValid)
+      throw new NotFoundException(ErrorCodes.InvalidCredentials);
+
+    return user;
   }
 }
