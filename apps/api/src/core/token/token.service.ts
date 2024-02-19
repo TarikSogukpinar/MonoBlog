@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
@@ -23,12 +27,22 @@ export class TokenService {
   }
 
   async createPasswordResetToken(user: User) {
+    const profile = await this.prismaService.profile.findUnique({
+      where: { userId: user.id },
+    });
+
+    // Profile bulunamazsa hata fırlat
+    if (!profile) {
+      throw new NotFoundException('User profile not found');
+    }
+
     const secret = this.configService.get<string>('JWT_SECRET');
     const passwordResetExpiresIn = this.configService.get<string>(
       'PASSWORD_RESET_EXPIRES_IN',
     );
+
     return this.jwtService.sign(
-      { email: user.email, id: user.id, type: 'passwordReset' },
+      { email: profile.email, id: user.id, type: 'passwordReset' },
       { secret, expiresIn: passwordResetExpiresIn },
     );
   }
@@ -42,7 +56,15 @@ export class TokenService {
   }
 
   async createRefreshToken(user: User) {
-    const payload = { email: user.email };
+    const profile = await this.prismaService.profile.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('User profile not found');
+    }
+
+    const payload = { email: profile.email };
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
@@ -50,8 +72,8 @@ export class TokenService {
   }
 
   async updateRefreshToken(user: User, token: string) {
-    await this.prismaService.user.update({
-      where: { id: user.id },
+    await this.prismaService.profile.update({
+      where: { userId: user.id },
       data: { refreshToken: token },
     });
   }
@@ -67,22 +89,25 @@ export class TokenService {
       throw new UnauthorizedException(ErrorCodes.InvalidToken);
     }
 
-    const user = await this.prismaService.user.findUnique({
+    const profile = await this.prismaService.profile.findUnique({
       where: { email: userEmail },
+      include: {
+        user: true, // User modelini de dahil et
+      },
     });
 
-    if (!user || user.refreshToken !== refreshToken) {
+    if (!profile || profile.refreshToken !== refreshToken) {
       throw new UnauthorizedException(ErrorCodes.InvalidToken);
     }
 
-    return this.createAccessToken(user);
+    return this.createAccessToken(profile.user);
   }
 
-  async blacklistToken(token: string): Promise<void> {
-    const decodedToken = this.jwtService.decode(token) as any;
-    const expiresAt = new Date(decodedToken.exp * 1000);
-    await this.prismaService.blacklistedToken.create({
-      data: { token, expiresAt },
-    });
-  }
+  // async blacklistToken(token: string): Promise<void> {
+  //   const decodedToken = this.jwtService.decode(token) as any;
+  //   const expiresAt = new Date(decodedToken.exp * 1000);
+  //   await this.prismaService.blacklistedToken.create({
+  //     data: { token, expiresAt },
+  //   });
+  // }
 }

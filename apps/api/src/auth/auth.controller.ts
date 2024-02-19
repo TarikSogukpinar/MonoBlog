@@ -44,18 +44,18 @@ export class AuthController {
     };
   }
 
-  @Post('logout')
-  @ApiOperation({ summary: 'Logout User' })
-  @ApiResponse({ status: 200, description: 'Successful logout' })
-  @ApiBody({ type: LogoutDto })
-  @UseGuards(JwtAuthGuard)
-  async logout(@Req() req: CustomRequest) {
-    const userId = req.user?.id;
-    const token = req.headers.get('authorization')?.split(' ')[1];
-    if (!userId) {
-      throw new UnauthorizedException(ErrorCodes.InvalidCredentials);
-    }
-    const result = await this.authService.logoutUserService(userId, token);
-    return { message: 'Logout successful', result };
-  }
+  // @Post('logout')
+  // @ApiOperation({ summary: 'Logout User' })
+  // @ApiResponse({ status: 200, description: 'Successful logout' })
+  // @ApiBody({ type: LogoutDto })
+  // @UseGuards(JwtAuthGuard)
+  // async logout(@Req() req: CustomRequest) {
+  //   const userId = req.user?.id;
+  //   const token = req.headers.get('authorization')?.split(' ')[1];
+  //   if (!userId) {
+  //     throw new UnauthorizedException(ErrorCodes.InvalidCredentials);
+  //   }
+  //   const result = await this.authService.logoutUserService(userId, token);
+  //   return { message: 'Logout successful', result };
+  // }
 }

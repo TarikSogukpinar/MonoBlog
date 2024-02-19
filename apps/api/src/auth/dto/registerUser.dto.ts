@@ -5,7 +5,7 @@ export class RegisterUserDto {
   @IsNotEmpty({ message: 'Username required' })
   @Length(2, 100, { message: 'Username too long' })
   username: string;
-  
+
   @IsEmail({}, { message: 'Email must be valid email' })
   @IsNotEmpty({ message: 'Email required' })
   @Length(2, 100, { message: 'Email too long' })
