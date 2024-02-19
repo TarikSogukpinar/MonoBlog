@@ -12,12 +12,14 @@ import { User } from '@prisma/client';
 import { PrismaService } from 'src/database/database.service';
 import { ErrorCodes } from 'src/core/handlers/error/error-codes';
 import { HashingService } from 'src/utils/hashing/hashing.service';
+import { TokenService } from 'src/core/token/token.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly hashingService: HashingService,
+    private readonly tokenService: TokenService,
   ) {}
 
   async registerUserService(
@@ -32,7 +34,7 @@ export class AuthService {
         throw new ConflictException(ErrorCodes.UserAlreadyExists);
       }
 
-      const createNewUser = await this.prismaService.user.create({
+      const createNewUser = await this.prismaService.profile.create({
         data: {
           email: registerUserDto.email,
           password: await this.hashingService.hashPassword(
