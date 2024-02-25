@@ -26,6 +26,12 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Successful register' })
   @ApiBody({ type: RegisterUserDto })
   async register(@Body() registerUserDto: RegisterUserDto) {
+    console.log(
+      'registerUserDto',
+      registerUserDto.password,
+      registerUserDto.email,
+      registerUserDto.username,
+    );
     const result = await this.authService.registerUserService(registerUserDto);
     return {
       message: 'Successfully register user!',

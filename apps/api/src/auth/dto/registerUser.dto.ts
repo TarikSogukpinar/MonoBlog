@@ -13,6 +13,5 @@ export class RegisterUserDto {
 
   @IsString({ message: 'Password must be string' })
   @IsNotEmpty({ message: 'Password required' })
-  @Length(2, 100, { message: 'Password too long' })
   password: string;
 }

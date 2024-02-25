@@ -18,7 +18,7 @@ import { TokenService } from 'src/core/token/token.service';
 export class AuthService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly hashingService: HashingService,
+    private hashingService: HashingService,
     private readonly tokenService: TokenService,
   ) {}
 
