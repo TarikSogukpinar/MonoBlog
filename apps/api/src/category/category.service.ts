@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../database/database.service';
 import { Category } from '@prisma/client';
 import { CreateCategoryDto } from './dto/createCategory.dto';
+import { UpdateCategoryDto } from './dto/updateCategory.dto';
 
 @Injectable()
 export class CategoryService {
@@ -19,6 +20,24 @@ export class CategoryService {
       });
 
       return newCategory;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
+  }
+
+  async updateCategoryService(
+    categoryId: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<Category> {
+    try {
+      const updatedCategory = await this.prismaService.category.update({
+        where: { id: categoryId },
+        data: updateCategoryDto,
+      });
+      return updatedCategory;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(

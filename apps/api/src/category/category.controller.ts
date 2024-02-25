@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Param } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateCategoryDto } from './dto/createCategory.dto';
@@ -17,6 +17,24 @@ export class CategoryController {
       this.categoryService.createCategoryService(createCategoryDto);
     return {
       message: 'Category created successfully!',
+      result,
+    };
+  }
+
+  @Post('updateCategory/:categoryId')
+  @ApiOperation({ summary: 'Update a category' })
+  @ApiResponse({ status: 200, description: 'Category updated successfully' })
+  @ApiBody({ type: CreateCategoryDto })
+  async updateCategory(
+    @Body() createCategoryDto: CreateCategoryDto,
+    @Param('categoryId') categoryId: string,
+  ) {
+    const result = this.categoryService.updateCategoryService(
+      categoryId,
+      createCategoryDto,
+    );
+    return {
+      message: 'Category updated successfully!',
       result,
     };
   }
