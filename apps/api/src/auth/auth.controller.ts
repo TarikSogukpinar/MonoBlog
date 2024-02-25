@@ -14,7 +14,6 @@ import { AuthService } from './auth.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RegisterUserDto } from './dto/registerUser.dto';
 import { LoginUserDto } from './dto/loginUser.dto';
-import { ErrorCodes } from 'src/core/handlers/error/error-codes';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -26,12 +25,6 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Successful register' })
   @ApiBody({ type: RegisterUserDto })
   async register(@Body() registerUserDto: RegisterUserDto) {
-    console.log(
-      'registerUserDto',
-      registerUserDto.password,
-      registerUserDto.email,
-      registerUserDto.username,
-    );
     const result = await this.authService.registerUserService(registerUserDto);
     return {
       message: 'Successfully register user!',

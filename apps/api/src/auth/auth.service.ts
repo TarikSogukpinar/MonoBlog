@@ -79,6 +79,22 @@ export class AuthService {
     }
   }
 
+  // async logoutUserService(userId: number, token: string): Promise<void> {
+  //   try {
+  //     await this.prismaService.user.update({
+  //       where: { id: userId },
+  //       data: { refreshToken: null },
+  //     });
+
+  //     // await this.tokenService.blacklistToken(token);
+  //   } catch (error) {
+  //     console.log(error);
+  //     throw new InternalServerErrorException(
+  //       'An error occurred, please try again later',
+  //     );
+  //   }
+  // }
+
   private async findUserByEmailService(
     username: string,
     email: string,
