@@ -26,33 +26,29 @@ export class AuthService {
     registerUserDto: RegisterUserDto,
   ): Promise<RegisterResponseDto> {
     try {
-      const existingProfile = await this.prismaService.profile.findUnique({
-        where: { email: registerUserDto.email },
-      });
+      const existingUser = await this.findUserByEmailService(
+        registerUserDto.email,
+        registerUserDto.username,
+      );
 
-      if (existingProfile) {
+      if (existingUser) {
         throw new ConflictException(ErrorCodes.UserAlreadyExists);
       }
 
-      const hashedPassword = await this.hashingService.hashPassword(
-        registerUserDto.password,
-      );
-
-      const newProfile = await this.prismaService.profile.create({
+      const createNewUser = await this.prismaService.user.create({
         data: {
           username: registerUserDto.username,
           email: registerUserDto.email,
-          password: hashedPassword,
-          user: {
-            create: {},
-          },
+          password: await this.hashingService.hashPassword(
+            registerUserDto.password,
+          ),
         },
       });
 
       return {
-        id: newProfile.id,
-        email: newProfile.email,
-        role: newProfile.role,
+        id: createNewUser.id,
+        email: createNewUser.email,
+        role: createNewUser.role,
       };
     } catch (error) {
       console.log(error);
@@ -66,15 +62,14 @@ export class AuthService {
     loginUserDto: LoginUserDto,
   ): Promise<LoginResponseDto> {
     try {
-      const user = await this.validateUserService(loginUserDto);
-      const accessToken = await this.tokenService.createAccessToken(user);
-      const refreshToken = await this.tokenService.createRefreshToken(user);
-      await this.tokenService.updateRefreshToken(user, refreshToken);
-
+      const users = await this.validateUserService(loginUserDto);
+      const accessToken = await this.tokenService.createAccessToken(users);
+      const refreshToken = await this.tokenService.createRefreshToken(users);
+      await this.tokenService.updateRefreshToken(users, refreshToken);
       return {
         accessToken,
         refreshToken,
-        // email: user.profile.email,
+        email: users.email,
       };
     } catch (error) {
       console.log(error);
@@ -84,38 +79,34 @@ export class AuthService {
     }
   }
 
-  private async findUserByEmailService(email: string): Promise<User | null> {
-    const profile = await this.prismaService.profile.findUnique({
-      where: { email },
-      include: {
-        user: true,
+  private async findUserByEmailService(
+    username: string,
+    email: string,
+  ): Promise<User> {
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        OR: [{ username }, { email }],
       },
     });
 
-    return profile?.user || null;
+    if (user) throw new ConflictException(ErrorCodes.UserAlreadyExists);
+    return user;
   }
 
-  private async validateUserService(loginUserDto: LoginUserDto): Promise<User> {
-    const profile = await this.prismaService.profile.findUnique({
-      where: { email: loginUserDto.email },
-      include: {
-        user: true,
-      },
-    });
+  private async validateUserService(loginUserDto: LoginUserDto) {
+    const { email, password } = loginUserDto;
+    const user = await this.prismaService.user.findUnique({ where: { email } });
 
-    if (!profile) {
-      throw new NotFoundException(ErrorCodes.UserNotFound);
-    }
+    if (!user) throw new NotFoundException(ErrorCodes.UserNotFound);
 
     const isPasswordValid = await this.hashingService.comparePassword(
-      loginUserDto.password,
-      profile.password,
+      password,
+      user.password,
     );
 
-    if (!isPasswordValid) {
+    if (!isPasswordValid)
       throw new NotFoundException(ErrorCodes.InvalidCredentials);
-    }
 
-    return profile.user;
+    return user;
   }
 }

@@ -14,9 +14,7 @@ import * as hpp from 'hpp';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   const configService = app.get(ConfigService);
-  app.setGlobalPrefix(
-    configService.get<string>('API_GLOBAL_PREFIX', { infer: true }),
-  );
+  app.setGlobalPrefix('/api');
 
   app.enableShutdownHooks();
   app.use(cookieParser());

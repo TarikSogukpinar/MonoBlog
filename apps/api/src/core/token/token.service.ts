@@ -27,22 +27,12 @@ export class TokenService {
   }
 
   async createPasswordResetToken(user: User) {
-    const profile = await this.prismaService.profile.findUnique({
-      where: { userId: user.id },
-    });
-
-    // Profile bulunamazsa hata fırlat
-    if (!profile) {
-      throw new NotFoundException('User profile not found');
-    }
-
     const secret = this.configService.get<string>('JWT_SECRET');
     const passwordResetExpiresIn = this.configService.get<string>(
       'PASSWORD_RESET_EXPIRES_IN',
     );
-
     return this.jwtService.sign(
-      { email: profile.email, id: user.id, type: 'passwordReset' },
+      { email: user.email, id: user.id, type: 'passwordReset' },
       { secret, expiresIn: passwordResetExpiresIn },
     );
   }
@@ -56,15 +46,7 @@ export class TokenService {
   }
 
   async createRefreshToken(user: User) {
-    const profile = await this.prismaService.profile.findUnique({
-      where: { userId: user.id },
-    });
-
-    if (!profile) {
-      throw new NotFoundException('User profile not found');
-    }
-
-    const payload = { email: profile.email };
+    const payload = { email: user.email };
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
@@ -72,8 +54,8 @@ export class TokenService {
   }
 
   async updateRefreshToken(user: User, token: string) {
-    await this.prismaService.profile.update({
-      where: { userId: user.id },
+    await this.prismaService.user.update({
+      where: { id: user.id },
       data: { refreshToken: token },
     });
   }
@@ -89,18 +71,15 @@ export class TokenService {
       throw new UnauthorizedException(ErrorCodes.InvalidToken);
     }
 
-    const profile = await this.prismaService.profile.findUnique({
+    const user = await this.prismaService.user.findUnique({
       where: { email: userEmail },
-      include: {
-        user: true, // User modelini de dahil et
-      },
     });
 
-    if (!profile || profile.refreshToken !== refreshToken) {
+    if (!user || user.refreshToken !== refreshToken) {
       throw new UnauthorizedException(ErrorCodes.InvalidToken);
     }
 
-    return this.createAccessToken(profile.user);
+    return this.createAccessToken(user);
   }
 
   // async blacklistToken(token: string): Promise<void> {

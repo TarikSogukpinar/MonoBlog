@@ -14,6 +14,7 @@ import { AuthService } from './auth.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RegisterUserDto } from './dto/registerUser.dto';
 import { LoginUserDto } from './dto/loginUser.dto';
+import { ErrorCodes } from 'src/core/handlers/error/error-codes';
 
 @Controller('auth')
 @ApiTags('Auth')

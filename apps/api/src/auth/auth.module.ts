@@ -6,6 +6,7 @@ import { TokenService } from 'src/core/token/token.service';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { HashingModule } from 'src/utils/hashing/hashing.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
       }),
       inject: [ConfigService],
     }),
+    HashingModule,
   ],
   controllers: [AuthController],
   providers: [
