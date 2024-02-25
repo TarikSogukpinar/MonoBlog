@@ -45,11 +45,12 @@ model Post {
 }
 
 model Category {
-  id           String   @id @default(uuid())
-  categoryName String   @unique
-  posts        Post[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                  String   @id @default(uuid())
+  categoryName        String   @unique
+  categoryDescription String
+  posts               Post[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@map("categories")
 }
