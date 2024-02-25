@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param } from '@nestjs/common';
+import { Controller, Post, Delete, Body, Param } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateCategoryDto } from './dto/createCategory.dto';
@@ -35,6 +35,17 @@ export class CategoryController {
     );
     return {
       message: 'Category updated successfully!',
+      result,
+    };
+  }
+
+  @Delete('deleteCategory/:categoryId')
+  @ApiOperation({ summary: 'Delete a category' })
+  @ApiResponse({ status: 200, description: 'Category deleted successfully' })
+  async deleteCategory(@Param('categoryId') categoryId: string) {
+    const result = this.categoryService.deleteCategoryService(categoryId);
+    return {
+      message: 'Category deleted successfully!',
       result,
     };
   }

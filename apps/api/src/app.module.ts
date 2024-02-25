@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './database/database.module';
 import { SwaggerModule } from './core/swagger/swagger.module';
 import { CategoryModule } from './category/category.module';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CategoryModule } from './category/category.module';
     TerminusModule,
     AuthModule,
     CategoryModule,
+    PostModule,
     PrismaModule,
     SwaggerModule,
   ],

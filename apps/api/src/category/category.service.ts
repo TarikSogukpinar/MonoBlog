@@ -45,4 +45,18 @@ export class CategoryService {
       );
     }
   }
+
+  async deleteCategoryService(categoryId: string): Promise<Category> {
+    try {
+      const deletedCategory = await this.prismaService.category.delete({
+        where: { id: categoryId },
+      });
+      return deletedCategory;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
+  }
 }
