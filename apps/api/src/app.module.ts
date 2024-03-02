@@ -7,6 +7,7 @@ import { PrismaModule } from './database/database.module';
 import { SwaggerModule } from './core/swagger/swagger.module';
 import { CategoryModule } from './category/category.module';
 import { PostModule } from './post/post.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PostModule } from './post/post.module';
     PostModule,
     PrismaModule,
     SwaggerModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [],

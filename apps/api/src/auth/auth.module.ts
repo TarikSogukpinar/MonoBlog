@@ -13,6 +13,7 @@ import { HashingModule } from 'src/utils/hashing/hashing.module';
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
+        //added config
         signOptions: { expiresIn: '60s' },
       }),
       inject: [ConfigService],
