@@ -7,14 +7,14 @@ import { HashingService } from 'src/utils/hashing/hashing.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { HashingModule } from 'src/utils/hashing/hashing.module';
+import { JwtStrategy } from './strategies/jwt.strategies';
 
 @Module({
   imports: [
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        //added config
-        signOptions: { expiresIn: '60s' },
+        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN') },
       }),
       inject: [ConfigService],
     }),
@@ -27,6 +27,7 @@ import { HashingModule } from 'src/utils/hashing/hashing.module';
     TokenService,
     HashingService,
     ConfigService,
+    JwtStrategy,
   ],
 })
 export class AuthModule {}

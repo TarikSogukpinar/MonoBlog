@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../database/database.service';
 import { Post } from '@prisma/client';
 import { CreatePostDto } from './dto/createPost.dto';
@@ -7,7 +12,6 @@ import { CreatePostDto } from './dto/createPost.dto';
 export class PostService {
   constructor(private prismaService: PrismaService) {}
 
-  //author id filled from token user id
   async createPostService(
     userId: string,
     createPostDto: CreatePostDto,
@@ -30,6 +34,34 @@ export class PostService {
       console.log(error);
       throw new InternalServerErrorException(
         'An error occurred while creating the post',
+      );
+    }
+  }
+
+  async deletePostService(postId: string, userId: string): Promise<Post> {
+    try {
+      const post = await this.prismaService.post.findUnique({
+        where: { id: postId },
+      });
+
+      if (!post) {
+        throw new NotFoundException('Post not found');
+      }
+
+      if (post.authorId !== userId) {
+        throw new ForbiddenException(
+          'You do not have permission to delete this post',
+        );
+      }
+
+      // Postu sil
+      return await this.prismaService.post.delete({
+        where: { id: postId },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred while deleting the post',
       );
     }
   }
