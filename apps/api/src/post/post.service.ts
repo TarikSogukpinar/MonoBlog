@@ -8,14 +8,17 @@ export class PostService {
   constructor(private prismaService: PrismaService) {}
 
   //author id filled from token user id
-  async createPostService(createPostDto: CreatePostDto): Promise<Post> {
+  async createPostService(
+    userId: string,
+    createPostDto: CreatePostDto,
+  ): Promise<Post> {
     try {
       const newPost = await this.prismaService.post.create({
         data: {
           title: createPostDto.title,
           content: createPostDto.content,
           published: createPostDto.published,
-          authorId: createPostDto.authorId,
+          authorId: userId,
           categories: {
             connect: { id: createPostDto.categoryId },
           },

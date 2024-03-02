@@ -13,8 +13,5 @@ export class CreatePostDto {
   published: boolean;
 
   @IsString()
-  authorId: string;
-
-  @IsString()
   categoryId: string;
 }
