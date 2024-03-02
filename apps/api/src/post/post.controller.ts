@@ -13,7 +13,7 @@ export class PostController {
   @ApiResponse({ status: 200, description: 'Post created successfully' })
   @ApiBody({ type: CreatePostDto })
   async createPost(@Body() createPostDto: CreatePostDto) {
-    const result = this.postService.createPostService(createPostDto);
+    const result = await this.postService.createPostService(createPostDto);
     return {
       message: 'Post created successfully!',
       result,

@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateCategoryDto } from './dto/createCategory.dto';
@@ -8,13 +8,27 @@ import { CreateCategoryDto } from './dto/createCategory.dto';
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
+  @Get('getAllCategory')
+  @ApiOperation({ summary: 'Get all categories' })
+  @ApiResponse({
+    status: 200,
+    description: 'All categories retrieved successfully',
+  })
+  async getAllCategory() {
+    const result = await this.categoryService.getAllCategoryService();
+    return {
+      message: 'All categories retrieved successfully!',
+      result,
+    };
+  }
+
   @Post('createCategory')
   @ApiOperation({ summary: 'Create a new category' })
   @ApiResponse({ status: 200, description: 'Category created successfully' })
   @ApiBody({ type: CreateCategoryDto })
   async createCategory(@Body() createCategoryDto: CreateCategoryDto) {
     const result =
-      this.categoryService.createCategoryService(createCategoryDto);
+      await this.categoryService.createCategoryService(createCategoryDto);
     return {
       message: 'Category created successfully!',
       result,
@@ -29,7 +43,7 @@ export class CategoryController {
     @Body() createCategoryDto: CreateCategoryDto,
     @Param('categoryId') categoryId: string,
   ) {
-    const result = this.categoryService.updateCategoryService(
+    const result = await this.categoryService.updateCategoryService(
       categoryId,
       createCategoryDto,
     );
@@ -43,7 +57,7 @@ export class CategoryController {
   @ApiOperation({ summary: 'Delete a category' })
   @ApiResponse({ status: 200, description: 'Category deleted successfully' })
   async deleteCategory(@Param('categoryId') categoryId: string) {
-    const result = this.categoryService.deleteCategoryService(categoryId);
+    const result = await this.categoryService.deleteCategoryService(categoryId);
     return {
       message: 'Category deleted successfully!',
       result,

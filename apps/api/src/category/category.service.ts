@@ -8,9 +8,21 @@ import { UpdateCategoryDto } from './dto/updateCategory.dto';
 export class CategoryService {
   constructor(private prismaService: PrismaService) {}
 
+  async getAllCategoryService(): Promise<Category[]> {
+    try {
+      const allCategories = await this.prismaService.category.findMany();
+      return allCategories;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred, please try again later',
+      );
+    }
+  }
+
   async createCategoryService(
     createCategoryDto: CreateCategoryDto,
-  ): Promise<Category> {
+  ): Promise<{ categoryName: string; categoryDescription: string }> {
     try {
       const newCategory = await this.prismaService.category.create({
         data: {
@@ -19,7 +31,10 @@ export class CategoryService {
         },
       });
 
-      return newCategory;
+      return {
+        categoryName: newCategory.categoryName,
+        categoryDescription: newCategory.categoryDescription,
+      };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
