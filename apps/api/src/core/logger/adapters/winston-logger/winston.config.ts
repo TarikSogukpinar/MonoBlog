@@ -8,9 +8,7 @@ const esTransportOptions = {
   level: 'info',
   indexPrefix: 'search-log-prefix',
   clientOpts: {
-    cloud: {
-      id: configService.get<string>('ELASTIC_CLOUD_ID'),
-    },
+    node: configService.get<string>('ELASTIC_URL'),
     auth: {
       username: configService.get<string>('ELASTICSEARCH_USERNAME'),
       password: configService.get<string>('ELASTICSEARCH_PASSWORD'),

@@ -8,9 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ElasticsearchModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        cloud: {
-          id: configService.get<string>('ELASTIC_CLOUD_ID'),
-        },
+        node: configService.get<string>('ELASTIC_URL'),
         auth: {
           username: configService.get<string>('ELASTICSEARCH_USERNAME'),
           password: configService.get<string>('ELASTICSEARCH_PASSWORD'),

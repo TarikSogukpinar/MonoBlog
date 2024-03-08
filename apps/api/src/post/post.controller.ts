@@ -1,4 +1,12 @@
-import { Controller, Post, Delete, Body, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Delete,
+  Body,
+  Req,
+  UseGuards,
+  Get,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -15,6 +23,18 @@ import { JwtAuthGuard } from 'src/auth/auth.guard';
 @ApiBearerAuth()
 export class PostController {
   constructor(private postService: PostService) {}
+
+  @Get(':postId')
+  @ApiOperation({ summary: 'Get a post by ID' })
+  @ApiResponse({ status: 200, description: 'Post found' })
+  @UseGuards(JwtAuthGuard)
+  async getPostById(@Body('postId') postId: string) {
+    const result = await this.postService.getPostByIdService(postId);
+    return {
+      message: 'Post found! 🎉',
+      result,
+    };
+  }
 
   @Post('createPost')
   @ApiOperation({ summary: 'Create a new post' })
@@ -34,7 +54,7 @@ export class PostController {
     };
   }
 
-  @Delete('deletePost')
+  @Delete('deletePost/:postId')
   @ApiOperation({ summary: 'Delete a post' })
   @ApiResponse({ status: 200, description: 'Post deleted successfully' })
   @UseGuards(JwtAuthGuard)

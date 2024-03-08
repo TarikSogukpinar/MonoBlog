@@ -8,9 +8,39 @@ import { PrismaService } from '../database/database.service';
 import { Post } from '@prisma/client';
 import { CreatePostDto } from './dto/createPost.dto';
 
+///api/posts/{postId} get
+///api/posts
+///api/posts/{postId} update
+///api/posts/{postId}/comments
+///api/posts/{postId} delete
+///api/posts/{postId}/like
+//api/posts/search
+
 @Injectable()
 export class PostService {
   constructor(private prismaService: PrismaService) {}
+
+  async getPostByIdService(postId: string): Promise<Post> {
+    try {
+      const post = await this.prismaService.post.findUnique({
+        where: { id: postId },
+        include: {
+          categories: true,
+        },
+      });
+
+      if (!post) {
+        throw new NotFoundException('Post not found');
+      }
+
+      return post;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'An error occurred while creating the post',
+      );
+    }
+  }
 
   async createPostService(
     userId: string,
@@ -54,7 +84,6 @@ export class PostService {
         );
       }
 
-      // Postu sil
       return await this.prismaService.post.delete({
         where: { id: postId },
       });

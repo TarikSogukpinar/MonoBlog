@@ -18,7 +18,7 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'All logs listed!' })
   async getAllLogs() {
     const elasticSearchQuery = {
-      index: this.configService.get('ELASTIC_LOG_PREFIX'),
+      index: '*',
       body: {
         query: {
           match_all: {},
